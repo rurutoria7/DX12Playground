@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Debug\DXDebugLayer.cpp" />
+    <ClCompile Include="DebugLayer\DXDebugLayer.cpp" />
     <ClCompile Include="D3D\DXContext.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Support\MyWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Debug\DXDebugLayer.h" />
+    <ClInclude Include="DebugLayer\DXDebugLayer.h" />
     <ClInclude Include="D3D\DXContext.h" />
     <ClInclude Include="Support\MyWindow.h" />
     <ClInclude Include="Support\ComPointer.h" />

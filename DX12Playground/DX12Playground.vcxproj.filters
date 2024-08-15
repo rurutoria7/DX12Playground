@@ -18,7 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\DXDebugLayer.cpp">
+    <ClCompile Include="DebugLayer\DXDebugLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3D\DXContext.cpp">
@@ -35,7 +35,7 @@
     <ClInclude Include="Support\ComPointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Debug\DXDebugLayer.h">
+    <ClInclude Include="DebugLayer\DXDebugLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3D\DXContext.h">

@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdlib>
 #include <Support/Compointer.h>
-#include <Debug/DXDebugLayer.h>
+#include <DebugLayer/DXDebugLayer.h>
 
 class DXContext
 {
