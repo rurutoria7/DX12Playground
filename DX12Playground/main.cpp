@@ -12,6 +12,11 @@ int main()
 	while (!MyWindow::Get().ShouldClose())
 	{
 		MyWindow::Get().Update();
+		if (MyWindow::Get().ShouldResize())
+		{
+			DXContext::Get().Flush(2);
+			MyWindow::Get().Resize();
+		}
 		auto* cmdList = DXContext::Get().InitCommandList();
 		DXContext::Get().ExecuteCommandList();
 		MyWindow::Get().Present();

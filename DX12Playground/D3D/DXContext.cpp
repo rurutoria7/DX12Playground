@@ -20,7 +20,6 @@ void DXContext::Init()
 		* nullptr: use default gpu
 		* D3D_FEATURE_LEVEL_11_0: minimum feature level required to gpu
 		* IID_PPV_ARGS(&device): COM Type GUID & result COM object pointer
-	
 	*/
 	if (FAILED(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&m_device))))
 		std::exit(-1);
