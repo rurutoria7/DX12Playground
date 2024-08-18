@@ -60,15 +60,25 @@ void MyWindow::Init()
 		std::cerr << "Failed to create swap chain" << std::endl;
 		std::exit(-1);
 	}
+
+    GetSwapChainBuffers();
 }
 
 void MyWindow::Update()
 {
+    // clear message queue
     MSG msg;
     while (PeekMessageW(&msg, m_wnd, 0, 0, PM_REMOVE))
     {
         TranslateMessage(&msg);
 		DispatchMessageW(&msg);
+    }
+
+
+    if (MyWindow::Get().ShouldResize())
+    {
+        DXContext::Get().Flush(1);
+        MyWindow::Get().Resize();
     }
 }
 
@@ -79,6 +89,7 @@ void MyWindow::Present()
 
 void MyWindow::Shutdown()
 {
+    ReleaseSwapChainBuffers();
     if(m_wnd) DestroyWindow(m_wnd);
     if(m_wndClass) UnregisterClassW((LPCWSTR)m_wndClass, GetModuleHandle(nullptr));
     m_swapChain.Release();
@@ -100,7 +111,10 @@ void MyWindow::Resize()
 
     m_height = std::max(1U, m_height);
     m_width = std::max(1U, m_width);
+
+    ReleaseSwapChainBuffers();
     m_swapChain->ResizeBuffers(2, m_width, m_height, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH | DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+    GetSwapChainBuffers();
 }
 
 void MyWindow::SetFullScreen(bool fullScreenEnabled)
@@ -147,6 +161,34 @@ void MyWindow::SetFullScreen(bool fullScreenEnabled)
     m_fullScreen = fullScreenEnabled;
 }
 
+void MyWindow::SetBackBufferStateRT(ID3D12GraphicsCommandList7* OUT cmdList)
+{
+    m_currentBackBuffer = m_swapChain->GetCurrentBackBufferIndex();
+
+    D3D12_RESOURCE_BARRIER brr{};
+    brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    brr.Transition.pResource = m_backBuffers[m_currentBackBuffer];
+    brr.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+    brr.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    brr.Transition.Subresource = 0;
+
+    cmdList->ResourceBarrier(1, &brr);
+}
+
+void MyWindow::SetBackBufferStatePRESENT(ID3D12GraphicsCommandList7* OUT cmdList)
+{
+    D3D12_RESOURCE_BARRIER brr{};
+    brr.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    brr.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+    brr.Transition.pResource = m_backBuffers[m_currentBackBuffer];
+    brr.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+    brr.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    brr.Transition.Subresource = 0;
+
+    cmdList->ResourceBarrier(1, &brr);
+}
+
 LRESULT(MyWindow::OnWindowMessage)(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpram)
 {
     if (msg == WM_KEYDOWN && wparam == VK_F11)
@@ -162,4 +204,32 @@ LRESULT(MyWindow::OnWindowMessage)(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpr
         MyWindow::Get().m_shouldClose = true;
 	}
     return DefWindowProcW(wnd, msg, wparam, lpram);
+}
+
+void MyWindow::GetSwapChainBuffers()
+{
+    for (int i = 0; i < 2; i++)
+    {
+        if (FAILED(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_backBuffers[i]))))
+        {
+            std::cerr << "Failed to get swap chain buffer" << std::endl;
+            std::exit(-1);
+        }
+    }
+
+    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+    rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+    rtvDesc.Texture2D.MipSlice = 0;
+    rtvDesc.Texture2D.PlaneSlice = 0;
+
+    DXContext::Get().GetDevice()->CreateRenderTargetView(m_backBuffers[0], &rtvDesc, DXContext::Get().GetRTVHeapHandle()[0]);
+    DXContext::Get().GetDevice()->CreateRenderTargetView(m_backBuffers[1], &rtvDesc, DXContext::Get().GetRTVHeapHandle()[1]);
+}
+
+
+void MyWindow::ReleaseSwapChainBuffers()
+{
+	m_backBuffers[0].Release();
+	m_backBuffers[1].Release();
 }

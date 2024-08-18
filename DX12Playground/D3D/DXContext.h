@@ -13,6 +13,8 @@ public:
 	inline ComPointer<ID3D12CommandQueue>& GetCommandQueue() { return m_commandQueue; }
 	inline ComPointer<ID3D12Fence1>& GetFence() { return m_fence; }
 	inline ComPointer<IDXGIFactory7>& GetFactory() { return m_factory; }
+	inline ComPointer<ID3D12DescriptorHeap>& GetRTVHeap() { return m_rtvHeap; }
+	inline D3D12_CPU_DESCRIPTOR_HANDLE* GetRTVHeapHandle() { return m_rtvHeapHandles; }
 	inline void Flush(size_t cnt)
 	{
 		for (size_t i = 0; i < cnt; i++)
@@ -32,6 +34,8 @@ private:
 	ComPointer<ID3D12CommandAllocator> m_commandAllocator;
 	ComPointer<ID3D12GraphicsCommandList7> m_commandList;
 	ComPointer<IDXGIFactory7> m_factory;
+	ComPointer<ID3D12DescriptorHeap> m_rtvHeap;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_rtvHeapHandles[2];
 	HANDLE m_fenceEvent = nullptr;
 
 public:
